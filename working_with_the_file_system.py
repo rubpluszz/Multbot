@@ -103,19 +103,21 @@ class WorkWithFileSystem():
         """Цей метод описує спосіб вибору правила для подальшої видачі картинок"""
         try:
             first_number = int(image_folder)+int(level_curent_game)
+            print("first_number", first_number)
             dilnyk = [7,5,3,2]
             for i in dilnyk:
                 if first_number%i == 0:
                     print("select_rules_to_opening_pictures" , i)
-                    return (i)
+            return (i)
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.select_rules_to_opening_pictures")
             return(str(e))
 
     def picture_for_current_level(self, image_folder, level_curent_game = "1", curent_round = 0):
         """Вибирає який jpg файл відправити користувачеві
-        image_folder - папка з картинкою, level_curent_game -Рівень в поточній ігровій сесії"""
+        image_folder - папка з картинкою, level_curent_game -Рівень в поточній ігровій сесії(одночасно ім'я піддиректорії)"""
         try:
+            print('picture_for_current_level ',image_folder)
             image = f"images/{image_folder}/{level_curent_game}/image_part_{self.rules_for_opening_pictures[self.select_rules_to_opening_pictures(image_folder, level_curent_game)][int(level_curent_game)][curent_round]}.jpg"
             return(image)
         except Exception as e:
@@ -136,7 +138,7 @@ class WorkWithFileSystem():
         """Цей метод повертає блок цікавої інформації для виведення користувачеві"""
         try:
             f = open(f"images/{image_folder}/inf_{self.language}.txt", "r")
-            return(random.choice(f.readlines())[1:])#В нульовім елементі знаходиться назва мультфільма
+            return(random.choice(f.readlines()[1:]))#В нульовім елементі знаходиться назва мультфільма
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.return_block_of_interesting_information")
             return(str(e))
@@ -159,9 +161,3 @@ class WorkWithFileSystem():
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.return_list_of_answer_options")
             return(str(e))
-
-if __name__ == "__main__":
-
-
-    #print(WorkWithFileSystem.return_the_list_of_folders_with_images('self'))
-    print(WorkWithFileSystem.select_a_picture_folder('self'))

@@ -167,22 +167,3 @@ class SqliteWork():
             print(str(e), "   >>>db.select_user_information")
     def __del__(self):
         self.connection.close()
-if __name__ == "__main__":
-    db = SqliteWork("111111")
-    print('start module testing')
-    #db.add_new_user()
-    #print(db.return_level_curent_game())
-    #db.change_level_curent_game()
-    #db.nullifies_level_curent_game()
-    #print(db.return_current_round())
-    #db.change_current_round()
-    #db.nullifies_curent_round()
-    #print(db.return_total_score
-    #db.change_total_score()
-    #print(db.return_numbers_win_games())
-    #print(db.return_numbers_lose_games())
-    #db.change_numbers_win_games()
-    #db.change_numbers_lose_games()
-    #db.change_curent_quest_folder("'test'")
-    #print(db.return_curent_quest_folder())
-    print(db.select_user_information())
