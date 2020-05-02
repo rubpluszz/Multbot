@@ -2,15 +2,15 @@
 import os
 from config import image_folder
 import random
+import _dictionary
 
 class WorkWithFileSystem():
     """В цьому классі описано методи вибору завдання а також відповідного малюнку
        Також тут описано вибір поточного малюнку """
 
-    def __init__(self, message, db):
-        """При виклику необхідно в конструктор необхідно передати об'єкт message(повыдомлення з телеграма)"""
-        self.user_id = message.from_user.id
-        self.language = message.from_user.language_code
+    def __init__(self, language):
+        """При виклику необхідно в конструктор необхідно передати language мова телеграм клієнта користувача"""
+        self.language = language
     #Послідовність картинок вибирається наступним способом з словника де першим ключем є найменьший дільник назви папки переведеної в int + рівень а другий рівень далі з списку вибирається по номеру раунда
     rules_for_opening_pictures = {2:{1:["001"],
                                      2:["001","002"],
@@ -128,7 +128,7 @@ class WorkWithFileSystem():
         """Цей метод повертає ім'я мультфільма з inf_{language_code}.txt
         image_folder - папка з картинкою завдванням """
         try:
-            f = open(f"images/{image_folder}/inf_{self.language}.txt", "r")
+            f = open(f"images/{image_folder}/inf_{self.language}.txt", "r", encoding = "utf-8")
             return (f.readline())
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.return_answer")
@@ -137,7 +137,7 @@ class WorkWithFileSystem():
     def return_block_of_interesting_information(self, image_folder):
         """Цей метод повертає блок цікавої інформації для виведення користувачеві"""
         try:
-            f = open(f"images/{image_folder}/inf_{self.language}.txt", "r")
+            f = open(f"images/{image_folder}/inf_{self.language}.txt", "r", encoding = "utf-8")
             return(random.choice(f.readlines()[1:]))#В нульовім елементі знаходиться назва мультфільма
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.return_block_of_interesting_information")
@@ -153,10 +153,9 @@ class WorkWithFileSystem():
             else:
                 list_of_answer[0] = image_folder
             random.shuffle(list_of_answer)
-            text_list_of_answer = []
+            text_list_of_answer = [_dictionary.expose_the_next_item[self.language][0]]
             for answer in list_of_answer:
                 text_list_of_answer.append(self.return_answer(answer))
-            print(text_list_of_answer)
             return text_list_of_answer
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.return_list_of_answer_options")

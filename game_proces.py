@@ -6,14 +6,13 @@ import _dictionary
 
 class GameProcess():
 
-    def __init__(self, message,):
+    def __init__(self, command, user_id, language):
         """При виклику необхідно в конструктор необхідно передати об'єкт message(повідомлення з телеграма)"""
-        self.message = message
-        self.command = message.text
-        self.user_id = message.from_user.id
-        self.language = message.from_user.language_code
+        self.command = command
+        self.user_id = user_id
+        self.language = language
         self.db = SqliteWork(self.user_id)
-        self.fs = WorkWithFileSystem(message, self.db)
+        self.fs = WorkWithFileSystem(language)
         self.message_hub = {'/start':self.reply_to_start_message,
                             'Нова гра':self.start_new_game,
                             'Далі':self.next_level,
@@ -29,8 +28,6 @@ class GameProcess():
         print('returned_message')
         if self.command in self.message_hub:
                 reply = self.message_hub[self.command]()
-        elif self.command == '   ':#Страховка якщо хтось натисне пусту кнопку
-            pass
         elif self.command in self.fs.return_answer(self.db.return_curent_quest_folder()):
             if int(self.db.return_level_curent_game())<16:
                 reply = self.confirmation_of_correct_answer()
@@ -45,6 +42,7 @@ class GameProcess():
             if self.db.return_level_curent_game()==0:
                 reply = self.command_is_not()
             else:
+                self.db.change_numbers_lose_games()#Збільшує у базі данних кількість програних ігор
                 reply = self.not_correct_answer()
                 self.db.nullifies_curent_round()
                 self.db.nullifies_level_curent_game()
@@ -52,14 +50,14 @@ class GameProcess():
 
     def command_is_not(self):
         """Цей метод викликається коли користувач присилає невідому команду"""
-        reply = {'text':_dictionary.this_command_is_not[self.language], 'image':None, 'keyboard_list':_dictionary.further_key[self.language]}
+        reply = {'text':_dictionary.this_command_is_not[self.language], 'keyboard_list':_dictionary.further_key[self.language]}
         return reply
 
     def confirmation_of_correct_answer(self):
        """Ця функція формує повідомлення про правильну відповідь"""
        messages_midle = self.fs.return_block_of_interesting_information(self.db.return_curent_quest_folder())
        reply_answer =  _dictionary.messages_begining_one[self.language]+self.command+_dictionary.messages_begining_thwo[self.language]+messages_midle+_dictionary.messages_end[self.language]
-       reply = {'text' : reply_answer, 'image' : None, 'keyboard_list':_dictionary.further_key[self.language]}
+       reply = {'text' : reply_answer, 'keyboard_list':_dictionary.further_key[self.language]}
        return reply
 
     def start_new_game(self):
@@ -81,25 +79,26 @@ class GameProcess():
 
     def reply_to_start_message(self):
         """Відповідь на повідомлення /start"""
-        reply = {'text':_dictionary.returned_messages[self.language], 'image':None, 'keyboard_list':_dictionary.empty_keys}
+        reply = {'text':_dictionary.reply_to_start[self.language],  }
         return reply
 
     def not_correct_answer(self):
         """В цьому методі буде здійснено формування повідомлення про поразку в
         котре входить повідмлення що ти програв, інформація про твої досягнення
         а також вивід таблиці лідерів"""
-        game_inf = self.db.select_user_information()
+        game_inf = self.db.select_user_information()#повертає всі дані користувача з бази данних
+        correct_answer = self.fs.return_answer(game_inf[6])
         total_score = _dictionary.total_score[self.language]+str(game_inf[2])+'\n'
         win_games   = _dictionary.win_games[self.language]+str(game_inf[4])+'\n'
         lost_games  = _dictionary.lost_games[self.language]+str(game_inf[5])+'\n'
-        reply = {'text':_dictionary.answer_is_bad[self.language] + total_score + win_games + lost_games, 'image':None, 'keyboard_list':_dictionary.empty_keys }
+        reply = {'text':_dictionary.answer_is_bad[self.language]+ correct_answer + _dictionary.your_scores[self.language]+ total_score + win_games + lost_games + _dictionary.press_new_game_to_start[self.language]}
         return reply
 
     def your_win_messages(self):
         """В цьому методі буде здійснено формування повідомлення про перемогу в
         котре входить повідмлення що ти переміг, інформація про твої досягнення
         а також вивід таблиці лідерів"""
-        reply = {'text':_dictionary.your_win_message_text[self.language], 'image':None, 'keyboard_list':_dictionary.empty_keys}
+        reply = {'text':_dictionary.your_win_message_text[self.language],  }
         return reply
 
     def next_level(self):
@@ -119,7 +118,7 @@ class GameProcess():
             image_folder = self.db.return_curent_quest_folder()
             reply = {'text':_dictionary.first_level[self.language]+_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         elif self.db.return_level_curent_game() == 0:
-            reply = {'text':_dictionary.not_curent_game[self.language], 'image':None, 'keyboard_list':_dictionary.empty_keys }
+            reply = {'text':_dictionary.not_curent_game[self.language] }
         else:
             image_folder = self.db.return_curent_quest_folder()
             reply = {'text':_dictionary.last_round[self.language]+_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
@@ -131,12 +130,12 @@ class GameProcess():
             image_folder = self.db.return_curent_quest_folder()
             reply = {'text':_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         else:
-            reply = {'text':_dictionary.continue_if_not_current_game[self.language], 'image':None, 'keyboard_list':_dictionary.empty_keys  }
+            reply = {'text':_dictionary.continue_if_not_current_game[self.language]}
         return reply
 
     def rulles(self):
         """Цей метод повертає повідомлення з правилами на відповідній мові"""
-        reply = {'text':_dictionary.rulles_text[self.language], 'image':None, 'keyboard_list':_dictionary.continue_[self.language]}
+        reply = {'text':_dictionary.rulles_text[self.language], 'keyboard_list':_dictionary.continue_[self.language]}
         return reply
 
     def statistics(self):
@@ -148,6 +147,6 @@ class GameProcess():
         lost_games  = _dictionary.lost_games[self.language]+str(game_inf[5])+'\n'
         level_game  = _dictionary.level_game[self.language]+str(game_inf[1])+'/16\n'
         round_level = _dictionary.round_level[self.language]+str(game_inf[3])+'/15\n'
-        reply = {'text':answer_text + total_score + win_games + lost_games + level_game + round_level, 'image':None, 'keyboard_list':_dictionary.continue_[self.language] }
+        reply = {'text':answer_text + total_score + win_games + lost_games + level_game + round_level, 'keyboard_list':_dictionary.continue_[self.language] }
         print(reply)
         return reply

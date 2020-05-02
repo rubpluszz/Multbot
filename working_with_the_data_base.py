@@ -165,5 +165,6 @@ class SqliteWork():
             return self.cursor.execute(f"SELECT * FROM users WHERE user_id = {self.user_id}").fetchall()[0]
         except Exception as e:
             print(str(e), "   >>>db.select_user_information")
+            return(str(e))
     def __del__(self):
         self.connection.close()
