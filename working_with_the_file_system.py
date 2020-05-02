@@ -91,10 +91,13 @@ class WorkWithFileSystem():
             print(str(e), "    >>>WorkWithFileSystem.return_the_list_of_folders_with_images")
             return str(e)
 
-    def select_a_picture_folder(self):
+    def select_a_picture_folder(self, old_folder):
         """Вибрати випадкову папку з картинкою папку з картинкою"""
         try:
-            return(random.choice(self.return_the_list_of_folders_with_images()))
+            new_folder=old_folder
+            while new_folder==old_folder:
+                new_folder = random.choice(self.return_the_list_of_folders_with_images())
+            return new_folder
         except Exception as e:
             print(str(e), "    >>>WorkWithFileSystem.select_a_picture_folder")
             return str(e)
@@ -147,7 +150,9 @@ class WorkWithFileSystem():
         """Цей метод повертає список з правильних та не правильних варіантів відповідей та записує номер правильної відповіді до DB"""
         try:
             image_folder_list = self.return_the_list_of_folders_with_images()#список папок з картинкaми
-            list_of_answer = random.choices(image_folder_list, k=6)
+            random.shuffle(image_folder_list)
+            list_of_answer = image_folder_list[0:6]
+            print(list_of_answer,"---------------------",image_folder_list)
             if image_folder in list_of_answer:
                 pass
             else:

@@ -103,7 +103,7 @@ class GameProcess():
 
     def next_level(self):
         """В цьому методі описано спосіб вибору наступного рівня"""
-        image_folder = self.fs.select_a_picture_folder()#Дізнаємся папку з вибраною кртинкою
+        image_folder = self.fs.select_a_picture_folder(self.db.return_curent_quest_folder())#Дізнаємся папку з вибраною кртинкою
         self.db.change_curent_quest_folder(image_folder)
         reply = {'text':_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         return reply
