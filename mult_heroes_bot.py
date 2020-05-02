@@ -22,7 +22,7 @@ def work_bot(message):
         print("New message received")
         game = GameProcess(message.text, message.from_user.id, message.from_user.language_code)
         reply = game.returned_message()
-        keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
+        keyboard = telebot.types.ReplyKeyboardMarkup(True, False)
         keyboard.row(start_new_game[message.from_user.language_code], statistics[message.from_user.language_code], rules[message.from_user.language_code])
         if 'keyboard_list'in reply:
             keyboard.row(reply['keyboard_list'][0])
