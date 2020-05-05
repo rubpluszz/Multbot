@@ -10,7 +10,10 @@ class GameProcess():
         """При виклику необхідно в конструктор необхідно передати об'єкт message(повідомлення з телеграма)"""
         self.command = command
         self.user_id = user_id
-        self.language = language
+        if language in ['uk']:
+            self.language = language
+        else:
+            self.language = 'uk'
         self.db = SqliteWork(self.user_id)
         self.fs = WorkWithFileSystem(language)
         self.message_hub = {'/start':self.reply_to_start_message,
@@ -56,7 +59,7 @@ class GameProcess():
     def confirmation_of_correct_answer(self):
        """Ця функція формує повідомлення про правильну відповідь"""
        messages_midle = self.fs.return_block_of_interesting_information(self.db.return_curent_quest_folder())
-       reply_answer =  _dictionary.messages_begining_one[self.language]+self.command+_dictionary.messages_begining_thwo[self.language]+messages_midle+_dictionary.messages_end[self.language]
+       reply_answer =  _dictionary.messages_begining_one[self.language]+self.command+_dictionary.messages_begining_thwo[self.language]+messages_midle+_dictionary.messages_end[self.language]+_dictionary.your_winning[self.language]+str(self.db.return_level_curent_game()-self.db.return_curent_round())+_dictionary.krystall
        reply = {'text' : reply_answer, 'keyboard_list':_dictionary.further_key[self.language]}
        return reply
 
@@ -105,7 +108,7 @@ class GameProcess():
         """В цьому методі описано спосіб вибору наступного рівня"""
         image_folder = self.fs.select_a_picture_folder(self.db.return_curent_quest_folder())#Дізнаємся папку з вибраною кртинкою
         self.db.change_curent_quest_folder(image_folder)
-        reply = {'text':_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
+        reply = {'text':_dictionary.quest[self.language]+_dictionary.winning_is_possible[self.language]+str(self.db.return_level_curent_game()-self.db.return_curent_round())+_dictionary.krystall,'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         return reply
 
     def next_round(self):
@@ -116,19 +119,19 @@ class GameProcess():
             reply = self.continue_game()
         elif self.db.return_level_curent_game() == 1:
             image_folder = self.db.return_curent_quest_folder()
-            reply = {'text':_dictionary.first_level[self.language]+_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
+            reply = {'text':_dictionary.first_level[self.language]+_dictionary.quest[self.language]+_dictionary.winning_is_possible[self.language]+'1'+_dictionary.krystall,'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         elif self.db.return_level_curent_game() == 0:
             reply = {'text':_dictionary.not_curent_game[self.language] }
         else:
             image_folder = self.db.return_curent_quest_folder()
-            reply = {'text':_dictionary.last_round[self.language]+_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
+            reply = {'text':_dictionary.last_round[self.language]+_dictionary.quest[self.language]+_dictionary.winning_is_possible[self.language]+'1'+_dictionary.krystall,'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         return reply
 
     def continue_game(self):
         """Продовжити гру"""
         if self.db.return_level_curent_game() != 0:
             image_folder = self.db.return_curent_quest_folder()
-            reply = {'text':_dictionary.quest[self.language],'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
+            reply = {'text':_dictionary.quest[self.language]+_dictionary.winning_is_possible[self.language]+str(self.db.return_level_curent_game()-self.db.return_curent_round())+_dictionary.krystall,'image':self.fs.picture_for_current_level(image_folder,self.db.return_level_curent_game(), self.db.return_curent_round()),'keyboard_list':self.fs.return_a_list_of_answer_options(image_folder)}
         else:
             reply = {'text':_dictionary.continue_if_not_current_game[self.language]}
         return reply
